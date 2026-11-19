@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Odissea Stellare 3D — Crediti: ANDREA29</title>
+  <style>
+    :root {
+      --bg-void: #03060d;
+      --panel: rgba(7, 15, 30, 0.84);
+      --panel-strong: rgba(5, 11, 23, 0.94);
+      --border: rgba(110, 205, 255, 0.28);
+      --accent: #49d2ff;
+      --accent-warm: #ffbe5c;
+      --accent-gold: #ffd88a;
+      --danger: #ff647c;
+      --text: #eef6ff;
+      --muted: #93acc9;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-void);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      width: 100%;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(45, 130, 220, 0.16), transparent 45%),
+        radial-gradient(circle at 82% 78%, rgba(220, 125, 45, 0.12), transparent 50%),
+        var(--bg-void);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    body.in-game {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #game-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      z-index: 1;
+      touch-action: none;
+    }
+
+    /* Visiera realistica da astronauta in prima persona */
+    #visor-overlay {
+      position: fixed;
+      inset: -14px;
+      pointer-events: none;
+      z-index: 2;
+      transition: transform 0.08s ease-out;
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(125, 215, 255, 0.025) 48%,
+          rgba(16, 48, 84, 0.22) 76%,
+          rgba(2, 5, 11, 0.72) 96%,
+          rgba(1, 3, 7, 0.94) 100%);
+      box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.85);
+    }
+
+    #visor-glare {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        linear-gradient(125deg,
+          rgba(150, 225, 255, 0.08) 0%,
+          rgba(150, 225, 255, 0.01) 18%,
+          transparent 34%,
+          rgba(255, 215, 150, 0.03) 82%,
+          transparent 100%);
+    }
+
+    #visor-hud-frame {
+      position: fixed;
+      inset: 12px;
+      pointer-events: none;
+      z-index: 4;
+      border: 1px solid rgba(110, 205, 255, 0.14);
+      border-radius: 26px;
+    }
+
+    /* Flash di salto Warp */
+    #warp-flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 8;
+      opacity: 0;
+      background: radial-gradient(circle at center, rgba(165, 235, 255, 0.72), rgba(50, 145, 255, 0.28) 55%, transparent 80%);
+      transition: opacity 0.22s ease;
+    }
+
+    /* Schermata iniziale scrollabile */
+    #start-screen {
+      position: relative;
+      z-index: 30;
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px 56px;
+      background: linear-gradient(180deg, rgba(3, 7, 15, 0.86) 0%, rgba(4, 9, 20, 0.93) 100%);
+    }
+
+    .start-card {
+      width: 100%;
+      max-width: 650px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 26px 22px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(14px);
+    }
+
+    .credit-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255, 216, 138, 0.18), rgba(73, 210, 255, 0.16));
+      border: 1px solid rgba(255, 216, 138, 0.45);
+      color: var(--accent-gold);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(73, 210, 255, 0.14);
+      border: 1px solid rgba(73, 210, 255, 0.35);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 5.2vw, 38px);
+      line-height: 1.12;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background: rgba(13, 26, 48, 0.72);
+      border: 1px solid rgba(110, 205, 255, 0.16);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .info-box strong {
+      display: block;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #3ec8ff, #2278ff);
+      color: #031020;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(46, 158, 255, 0.38);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+      filter: brightness(1.08);
+    }
+
+    .btn-secondary {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11, 24, 45, 0.85);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(18, 39, 72, 0.95);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    /* HUD in volo */
+    #hud {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: none;
+    }
+
+    .hud-top {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-pill {
+      pointer-events: auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 9px 13px;
+      backdrop-filter: blur(10px);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    .hud-author {
+      color: var(--accent-gold);
+      font-weight: 800;
+      font-size: 10.5px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .hud-planet-name {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .hud-actions {
+      pointer-events: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #crosshair {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: 24px;
+      height: 24px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 6;
+      display: none;
+    }
+
+    #crosshair::before,
+    #crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(145, 228, 255, 0.78);
+      border-radius: 2px;
+    }
+
+    #crosshair::before {
+      left: 11px;
+      top: 2px;
+      width: 2px;
+      height: 20px;
+    }
+
+    #crosshair::after {
+      top: 11px;
+      left: 2px;
+      height: 2px;
+      width: 20px;
+    }
+
+    #scan-prompt {
+      position: fixed;
+      left: 50%;
+      bottom: 22%;
+      transform: translateX(-50%);
+      z-index: 11;
+      background: rgba(6, 17, 34, 0.9);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Scheda descrittiva del pianeta */
+    #planet-card {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: min(410px, calc(100vw - 32px));
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 20;
+      background: var(--panel-strong);
+      border: 1px solid rgba(110, 205, 255, 0.42);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.78);
+      display: none;
+      pointer-events: auto;
+    }
+
+    .planet-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .planet-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-warm);
+      font-weight: 700;
+    }
+
+    .planet-title {
+      margin: 2px 0 0;
+      font-size: 22px;
+      color: var(--text);
+    }
+
+    .close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .planet-quote {
+      margin: 0 0 12px;
+      padding-left: 10px;
+      border-left: 2px solid var(--accent);
+      color: #c8e6ff;
+      font-style: italic;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .planet-desc {
+      margin: 0 0 14px;
+      color: var(--text);
+      font-size: 13.8px;
+      line-height: 1.58;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-item {
+      background: rgba(13, 27, 50, 0.78);
+      border: 1px solid rgba(110, 205, 255, 0.16);
+      border-radius: 12px;
+      padding: 9px 11px;
+      font-size: 12px;
+    }
+
+    .stat-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .stat-item strong {
+      color: var(--text);
+      font-size: 12.5px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Atlante Galattico / Mappa Warp */
+    #galaxy-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      background: rgba(3, 7, 15, 0.84);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      pointer-events: auto;
+    }
+
+    .galaxy-box {
+      width: 100%;
+      max-width: 620px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 24px 65px rgba(0, 0, 0, 0.82);
+    }
+
+    .sector-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0 14px;
+    }
+
+    .sector-tab {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(12, 25, 48, 0.75);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sector-tab.active {
+      background: rgba(73, 210, 255, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .planet-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .planet-pick {
+      text-align: left;
+      padding: 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(110, 205, 255, 0.22);
+      background: rgba(12, 25, 48, 0.78);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .planet-pick:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .planet-pick strong {
+      display: block;
+      font-size: 14.5px;
+      color: var(--accent);
+    }
+
+    .planet-pick small {
+      display: block;
+      color: var(--muted);
+      font-size: 11.5px;
+      margin-top: 3px;
+    }
+
+    /* Controlli Touch per smartphone e tablet */
+    #touch-controls {
+      position: fixed;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+      display: none;
+    }
+
+    .dpad {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      width: 132px;
+      height: 132px;
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .dpad-btn {
+      background: rgba(9, 21, 40, 0.72);
+      border: 1px solid rgba(110, 205, 255, 0.32);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+
+    .dpad-btn.active {
+      background: rgba(73, 210, 255, 0.35);
+      border-color: var(--accent);
+    }
+
+    .dpad-empty {
+      pointer-events: none;
+    }
+
+    .thruster-pad {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .action-btn {
+      min-width: 84px;
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 13px;
+      border: 1px solid rgba(110, 205, 255, 0.36);
+      background: rgba(9, 21, 40, 0.78);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      touch-action: none;
+    }
+
+    .action-btn.active {
+      background: rgba(73, 210, 255, 0.35);
+      border-color: var(--accent);
+    }
+
+    .desktop-hint {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      z-index: 9;
+      background: rgba(6, 15, 30, 0.72);
+      border: 1px solid rgba(110, 205, 255, 0.2);
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-hint {
+        display: none;
+      }
+
+      #planet-card {
+        left: 12px;
+        right: 12px;
+        bottom: 156px;
+        width: auto;
+        max-height: 48vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+  <div id="visor-overlay"></div>
+  <div id="visor-glare"></div>
+  <div id="visor-hud-frame"></div>
+  <div id="warp-flash"></div>
+  <div id="crosshair"></div>
+  <div id="scan-prompt">Premi [F] o tocca il pianeta per leggere la scheda</div>
+
+  <!-- Schermata iniziale scrollabile -->
+  <section id="start-screen">
+    <div class="start-card">
+      <div class="credit-banner">✦ CREATO DA ANDREA29 ✦</div>
+      <div class="badge">Esplorazione Spaziale 3D in Prima Persona • PBR &amp; Shader</div>
+      <h1>Odissea Stellare 3D</h1>
+      <p class="subtitle">
+        Indossa il casco da astronauta, attraversa quattro settori galattici ricchi di mondi dettagliati,
+        fasce di asteroidi, anelli, lune e atmosfere realistiche, e osserva da vicino pianeti unici con le loro schede scientifiche e poetiche.
+      </p>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <strong>Crediti &amp; Direzione</strong>
+          Progetto e direzione creativa: <b>ANDREA29</b> — 12 mondi procedurali ad alta fedeltà.
+        </div>
+        <div class="info-box">
+          <strong>Computer (Desktop)</strong>
+          <b>WASD</b> / Frecce per volare, <b>Spazio</b> / <b>Q</b> su/giù, <b>Shift</b> turbo, trascina o clicca per guardare e scansionare.
+        </div>
+        <div class="info-box">
+          <strong>Telefono &amp; Tablet</strong>
+          Scorri liberamente qui, poi tocca <b>Avvia Esplorazione</b>: usa il pad in basso a sinistra, i pulsanti a destra e trascina per guardarti intorno.
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary" type="button">Avvia Esplorazione</button>
+    </div>
+  </section>
+
+  <!-- HUD superiore -->
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-pill">
+        <div class="hud-author">CREDITI: ANDREA29</div>
+        <div id="hud-sector" style="font-size:10.5px;color:#93acc9;letter-spacing:0.8px;text-transform:uppercase;">Settore Galattico I</div>
+        <div class="hud-planet-name" id="hud-target">In rotta...</div>
+        <div id="hud-distance" style="color:#93acc9;font-size:12px;">Distanza: --</div>
+      </div>
+
+      <div class="hud-actions">
+        <button id="btn-scan" class="btn-secondary" type="button">Scheda Pianeta</button>
+        <button id="btn-galaxy" class="btn-secondary" type="button">Galassie &amp; Warp</button>
+        <button id="btn-audio" class="btn-secondary" type="button">Audio: ON</button>
+      </div>
+    </div>
+
+    <div class="desktop-hint">
+      <b>WASD</b>/Frecce: Vola • <b>Spazio/Q</b>: Quota • <b>Shift</b>: Turbo • <b>Trascina</b>: Guarda • <b>F</b>/Click: Scheda • <b>M</b>: Galassie
+    </div>
+  </div>
+
+  <!-- Controlli touch -->
+  <div id="touch-controls">
+    <div class="dpad" id="dpad">
+      <div class="dpad-empty"></div>
+      <button class="dpad-btn" data-control="forward" type="button" aria-label="Avanti">▲</button>
+      <div class="dpad-empty"></div>
+      <button class="dpad-btn" data-control="left" type="button" aria-label="Sinistra">◀</button>
+      <div class="dpad-empty"></div>
+      <button class="dpad-btn" data-control="right" type="button" aria-label="Destra">▶</button>
+      <div class="dpad-empty"></div>
+      <button class="dpad-btn" data-control="backward" type="button" aria-label="Indietro">▼</button>
+      <div class="dpad-empty"></div>
+    </div>
+
+    <div class="thruster-pad">
+      <button class="action-btn" data-control="up" type="button">SU ▲</button>
+      <button class="action-btn" data-control="down" type="button">GIÙ ▼</button>
+      <button class="action-btn" data-control="boost" type="button">TURBO ⚡</button>
+    </div>
+  </div>
+
+  <!-- Scheda descrittiva del pianeta -->
+  <aside id="planet-card" aria-live="polite">
+    <div class="planet-card-header">
+      <div>
+        <div class="planet-tag" id="card-category">Categoria Planetaria</div>
+        <h2 class="planet-title" id="card-title">Nome Pianeta</h2>
+      </div>
+      <button id="close-card-btn" class="close-btn" type="button" aria-label="Chiudi scheda">✕</button>
+    </div>
+    <p class="planet-quote" id="card-quote"></p>
+    <p class="planet-desc" id="card-desc"></p>
+    <div class="stats-grid" id="card-stats"></div>
+    <div class="card-actions">
+      <button id="btn-orbit" class="btn-secondary" type="button">Mettiti in Orbita</button>
+      <button id="btn-next" class="btn-primary" type="button" style="flex:1;padding:11px 14px;font-size:13px;">Prossimo Pianeta →</button>
+    </div>
+  </aside>
+
+  <!-- Atlante delle Galassie e Salto Warp -->
+  <div id="galaxy-modal">
+    <div class="galaxy-box">
+      <div class="planet-card-header">
+        <div>
+          <div class="planet-tag">Atlante Cosmico • ANDREA29</div>
+          <h2 class="planet-title">Galassie &amp; Salti Warp</h2>
+        </div>
+        <button id="close-galaxy-btn" class="close-btn" type="button" aria-label="Chiudi atlante">✕</button>
+      </div>
+      <p style="margin:6px 0 0;color:#93acc9;font-size:13px;">
+        Filtra per settore galattico o scegli un mondo per attivare un salto Warp immediato.
+      </p>
+      <div class="sector-tabs" id="sector-tabs"></div>
+      <div class="planet-list" id="planet-list"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script>
+    // Catalogo completo dei 12 mondi distribuiti in 4 settori galattici
+    const PLANETS_DATA = [
+      {
+        id: "aurelia",
+        sector: "Settore Galattico I • Braccio di Aurelia",
+        name: "Aurelia Prime",
+        category: "Mondo Oceanico Bioluminescente",
+        quote: "«Un oceano infinito dove le correnti respirano luce azzurra sotto cieli d'ambra.»",
+        description: "Avvolto da un'atmosfera densa e cristallina, Aurelia Prime è dominato da mari profondi ricchi di plancton bioluminescente che disegna spirali luminose durante la notte planetaria. Arcipelaghi di basalto scuro emergono tra banchi di nebbia dorata.",
+        gravity: "0.94 g",
+        temperature: "+19 °C",
+        atmosphere: "Azoto, Ossigeno, Vapore Marino",
+        wonder: "Fosse abissali iridescenti e maree doppie",
+        position: [0, 6, -95],
+        radius: 17,
+        theme: "ocean",
+        primaryColor: "#1677c9",
+        secondaryColor: "#0b2d5c",
+        cloudColor: "#d9f4ff",
+        atmosphereColor: "#5ad2ff",
+        emissiveColor: "#14b8ff",
+        moons: 2,
+        ring: null
+      },
+      {
+        id: "elysia",
+        sector: "Settore Galattico I • Braccio di Aurelia",
+        name: "Elysia-B",
+        category: "Gigante con Anelli di Cristallo",
+        quote: "«Miliardi di frammenti glaciali danzano come un'alba perenne attorno al suo equatore.»",
+        description: "Elysia-B unisce fasce temperate color smeraldo e ocra a un sistema di anelli vastissimo e luminoso. Riflettendo la luce della stella madre, gli anelli proiettano ombre geometriche e bagliori argentei sull'intera sfera.",
+        gravity: "1.65 g",
+        temperature: "-12 °C",
+        atmosphere: "Idrogeno, Elio, Tracce di Metano",
+        wonder: "Anelli stratificati con divisioni di risonanza",
+        position: [135, 22, -230],
+        radius: 25,
+        theme: "ringed",
+        primaryColor: "#399e8a",
+        secondaryColor: "#7a5b34",
+        cloudColor: "#fff3db",
+        atmosphereColor: "#8ef0d8",
+        emissiveColor: "#28594e",
+        moons: 3,
+        ring: { inner: 33, outer: 56, color: "#e8dec8", opacity: 0.84 }
+      },
+      {
+        id: "thalassa",
+        sector: "Settore Galattico I • Braccio di Aurelia",
+        name: "Thalassa IV",
+        category: "Mondo Arcipelago & Lagune Turchesi",
+        quote: "«Dove acque basse color zaffiro incontrano scogliere di corallo minerale.»",
+        description: "Thalassa IV è punteggiato da migliaia di isole vulcaniche e lagune poco profonde che brillano di turchese e acquamarina. Nubi alte e filiformi si allungano lungo gli alisei equatoriali creando un mosaico cromatico di rara quiete.",
+        gravity: "0.88 g",
+        temperature: "+24 °C",
+        atmosphere: "Azoto, Ossigeno, Argon",
+        wonder: "Barriere coralline silicee visibili dall'orbita",
+        position: [-145, -14, -275],
+        radius: 15.5,
+        theme: "ocean",
+        primaryColor: "#139c9e",
+        secondaryColor: "#1b4965",
+        cloudColor: "#f0fbff",
+        atmosphereColor: "#64f0e8",
+        emissiveColor: "#105e68",
+        moons: 1,
+        ring: null
+      },
+      {
+        id: "vespera",
+        sector: "Settore Galattico II • Nebulosa di Vespera",
+        name: "Vespera IX",
+        category: "Gigante Gassoso a Fasce Violette",
+        quote: "«Tempeste antiche ruotano come rose di velluto cremisi e indaco.»",
+        description: "Un colosso gassoso solcato da correnti a getto ad altissima velocità. Le sue bande di ammoniaca e composti organici complessi formano vortici persistenti e tempeste ovali che cambiano tonalità al variare dell'angolo solare.",
+        gravity: "2.40 g",
+        temperature: "-88 °C",
+        atmosphere: "Idrogeno, Elio, Ammoniaca",
+        wonder: "Grande Vortice Cremisi e fulmini d'alta quota",
+        position: [-165, 34, -410],
+        radius: 29,
+        theme: "gas",
+        primaryColor: "#8a4fff",
+        secondaryColor: "#d95b7a",
+        cloudColor: "#ffd8e8",
+        atmosphereColor: "#b88cff",
+        emissiveColor: "#3c1866",
+        moons: 4,
+        ring: { inner: 37, outer: 48, color: "#cfa8ff", opacity: 0.45 }
+      },
+      {
+        id: "helios",
+        sector: "Settore Galattico II • Nebulosa di Vespera",
+        name: "Helios-V",
+        category: "Mondo Vulcanico a Crosta Incandescente",
+        quote: "«Fiumi di magma fendono la roccia nera come vene di fuoco vivo.»",
+        description: "Troppo vicino alla sua stella per conservare oceani liquidi, Helios-V presenta fratture tettoniche incandescenti che si illuminano lungo il terminatore notturno. Colonne di cenere e bagliori arancioni colorano la bassa atmosfera.",
+        gravity: "1.18 g",
+        temperature: "+460 °C",
+        atmosphere: "Anidride Solforosa, CO2, Silicati",
+        wonder: "Rift magmatici continui e caldere luminose",
+        position: [15, -18, -555],
+        radius: 16,
+        theme: "volcanic",
+        primaryColor: "#382421",
+        secondaryColor: "#1b1314",
+        cloudColor: "#6e473b",
+        atmosphereColor: "#ff7b39",
+        emissiveColor: "#ff5514",
+        moons: 1,
+        ring: null
+      },
+      {
+        id: "ignis",
+        sector: "Settore Galattico II • Nebulosa di Vespera",
+        name: "Ignis Prime",
+        category: "Super-Terra Basaltica ad Alta Energia",
+        quote: "«Un cuore di ferro e lava che pulsa sotto una coltre di ceneri dorate.»",
+        description: "Più massiccio di Helios-V, Ignis Prime combina altipiani basaltici scuri, crateri antichi e fessure laviche che disegnano mappe incandescenti. Le sue nubi dense trattengono il calore e diffondono una luce ramata.",
+        gravity: "1.52 g",
+        temperature: "+390 °C",
+        atmosphere: "CO2, Vapore di Zolfo, Azoto",
+        wonder: "Catene di vulcani a scudo e laghi di lava",
+        position: [205, 18, -590],
+        radius: 19,
+        theme: "volcanic",
+        primaryColor: "#4a2518",
+        secondaryColor: "#23120e",
+        cloudColor: "#8a5238",
+        atmosphereColor: "#ff9848",
+        emissiveColor: "#ff6a1a",
+        moons: 2,
+        ring: null
+      },
+      {
+        id: "cryos",
+        sector: "Settore Galattico III • Confine Glaciale",
+        name: "Cryos-7",
+        category: "Mondo Glaciale a Cristalli Azzurri",
+        quote: "«Un silenzio scolpito nel ghiaccio puro che rifrange ogni raggio stellare.»",
+        description: "Ricoperto da calotte glaciali compatte e creste di ghiaccio d'acqua e azoto solido, Cryos-7 brilla come una gemma polare. Sotto la crosta ghiacciata si nascondono cavità termiche che sprigionano pennacchi di vapore.",
+        gravity: "0.79 g",
+        temperature: "-145 °C",
+        atmosphere: "Azoto, Tracce di Ossigeno e Neon",
+        wonder: "Guglie di ghiaccio prismatico e aurore polari",
+        position: [185, 28, -730],
+        radius: 18,
+        theme: "ice",
+        primaryColor: "#9be7ff",
+        secondaryColor: "#4b8ec7",
+        cloudColor: "#ffffff",
+        atmosphereColor: "#8fe6ff",
+        emissiveColor: "#1a4d78",
+        moons: 2,
+        ring: null
+      },
+      {
+        id: "chronos",
+        sector: "Settore Galattico III • Confine Glaciale",
+        name: "Chronos Major",
+        category: "Gigante d'Oro & Polveri Cosmiche",
+        quote: "«Fasce d'oro e ocra ruotano lente in un balletto gravitazionale millenario.»",
+        description: "Chronos Major sfoggia sfumature dorate, senape e bronzo su un disco massiccio circondato da anelli sottili ma nitidi. Le sue lune scolpiscono onde di densità lungo il bordo esterno del sistema anulare.",
+        gravity: "2.15 g",
+        temperature: "-104 °C",
+        atmosphere: "Idrogeno, Elio, Idrocarburi",
+        wonder: "Anelli dorati a risonanza e lune pastore",
+        position: [-140, 12, -830],
+        radius: 26.5,
+        theme: "ringed",
+        primaryColor: "#d99b38",
+        secondaryColor: "#7a491d",
+        cloudColor: "#fff0c2",
+        atmosphereColor: "#ffd27d",
+        emissiveColor: "#543210",
+        moons: 3,
+        ring: { inner: 34, outer: 55, color: "#f5cf87", opacity: 0.78 }
+      },
+      {
+        id: "verdantus",
+        sector: "Settore Galattico III • Confine Glaciale",
+        name: "Verdantus Nova",
+        category: "Mondo Forestale & Nebbie Smeraldo",
+        quote: "«Continenti verdeggianti avvolti da spirali di nubi e mari interni calmi.»",
+        description: "Un raro equilibrio tra terre emerse color smeraldo, deserti ocra e bacini oceanici profondi. Spessi strati di nubi si avvolgono attorno alle fasce temperate creando giochi di luce morbida e naturale.",
+        gravity: "1.02 g",
+        temperature: "+16 °C",
+        atmosphere: "Azoto, Ossigeno, CO2",
+        wonder: "Foreste continentali e cicloni simmetrici",
+        position: [20, -24, -950],
+        radius: 17.5,
+        theme: "ocean",
+        primaryColor: "#2b9e63",
+        secondaryColor: "#1b5e8a",
+        cloudColor: "#f2fff9",
+        atmosphereColor: "#78ffbe",
+        emissiveColor: "#145938",
+        moons: 2,
+        ring: null
+      },
+      {
+        id: "astralis",
+        sector: "Settore Galattico IV • Orizzonte Profondo",
+        name: "Astralis Omega",
+        category: "Mondo Esotico ad Atmosfera Aureo-Cobalto",
+        quote: "«Ai confini della rotta, un mondo dove luce stellare e nebbie cosmiche si fondono.»",
+        description: "Posto all'estremo limite del settore esplorato, Astralis Omega combina continenti cobalto e ambra con un alone atmosferico intenso e una doppia cintura di anelli cristallini. È la meta ideale per chi cerca l'ignoto assoluto.",
+        gravity: "1.27 g",
+        temperature: "+4 °C",
+        atmosphere: "Elio, Azoto, Gas Ionizzati",
+        wonder: "Doppio anello cromatico e riflessi aurorali",
+        position: [0, 16, -1120],
+        radius: 22,
+        theme: "exotic",
+        primaryColor: "#3b6eff",
+        secondaryColor: "#d68c32",
+        cloudColor: "#fff2dc",
+        atmosphereColor: "#7ab4ff",
+        emissiveColor: "#29489e",
+        moons: 3,
+        ring: { inner: 29, outer: 45, color: "#9ec8ff", opacity: 0.68 }
+      },
+      {
+        id: "solisrift",
+        sector: "Settore Galattico IV • Orizzonte Profondo",
+        name: "Solis Rift",
+        category: "Mondo Cratere & Faglia Termica",
+        quote: "«Antiche cicatrici planetarie brillano di bagliori rame sotto cieli d'indaco.»",
+        description: "Solcato da una faglia equatoriale profonda e da enormi bacini d'impatto, Solis Rift conserva sacche di energia geotermica lungo le fratture più antiche. Le sue nubi sottili lasciano intravedere rilievi netti e contrastati.",
+        gravity: "1.11 g",
+        temperature: "+68 °C",
+        atmosphere: "CO2, Azoto, Argon",
+        wonder: "Faglia termica equatoriale e crateri a terrazze",
+        position: [-210, 26, -1240],
+        radius: 17,
+        theme: "volcanic",
+        primaryColor: "#7a4638",
+        secondaryColor: "#312438",
+        cloudColor: "#ffd6c2",
+        atmosphereColor: "#ff9f6e",
+        emissiveColor: "#c95b28",
+        moons: 2,
+        ring: null
+      },
+      {
+        id: "hyperion",
+        sector: "Settore Galattico IV • Orizzonte Profondo",
+        name: "Hyperion Reach",
+        category: "Gigante Ghiacciato ad Alone Zaffiro",
+        quote: "«Un colosso tranquillo sospeso tra polveri stellari e silenzi profondi.»",
+        description: "L'ultimo avamposto registrato nell'atlante: un gigante ghiacciato dalle sfumature zaffiro e ceruleo, avvolto da strati atmosferici luminosi e sorvegliato da lune ghiacciate che orbitano su piani inclinati.",
+        gravity: "1.88 g",
+        temperature: "-132 °C",
+        atmosphere: "Idrogeno, Elio, Metano",
+        wonder: "Strati di metano azzurro e lune inclinate",
+        position: [220, -10, -1320],
+        radius: 24.5,
+        theme: "ice",
+        primaryColor: "#2d7dff",
+        secondaryColor: "#14377a",
+        cloudColor: "#e6f3ff",
+        atmosphereColor: "#73b8ff",
+        emissiveColor: "#1a3f8c",
+        moons: 4,
+        ring: { inner: 32, outer: 44, color: "#a8d2ff", opacity: 0.42 }
+      }
+    ];
+
+    const SECTORS = [
+      "Tutti i Settori",
+      "Settore Galattico I • Braccio di Aurelia",
+      "Settore Galattico II • Nebulosa di Vespera",
+      "Settore Galattico III • Confine Glaciale",
+      "Settore Galattico IV • Orizzonte Profondo"
+    ];
+
+    // Riferimenti UI
+    const startScreen = document.getElementById("start-screen");
+    const startBtn = document.getElementById("start-btn");
+    const hud = document.getElementById("hud");
+    const crosshair = document.getElementById("crosshair");
+    const scanPrompt = document.getElementById("scan-prompt");
+    const touchControls = document.getElementById("touch-controls");
+    const visorOverlay = document.getElementById("visor-overlay");
+    const warpFlash = document.getElementById("warp-flash");
+
+    const hudSector = document.getElementById("hud-sector");
+    const hudTarget = document.getElementById("hud-target");
+    const hudDistance = document.getElementById("hud-distance");
+
+    const planetCard = document.getElementById("planet-card");
+    const cardCategory = document.getElementById("card-category");
+    const cardTitle = document.getElementById("card-title");
+    const cardQuote = document.getElementById("card-quote");
+    const cardDesc = document.getElementById("card-desc");
+    const cardStats = document.getElementById("card-stats");
+    const closeCardBtn = document.getElementById("close-card-btn");
+    const btnOrbit = document.getElementById("btn-orbit");
+    const btnNext = document.getElementById("btn-next");
+
+    const galaxyModal = document.getElementById("galaxy-modal");
+    const sectorTabsEl = document.getElementById("sector-tabs");
+    const planetListEl = document.getElementById("planet-list");
+    const btnScan = document.getElementById("btn-scan");
+    const btnGalaxy = document.getElementById("btn-galaxy");
+    const closeGalaxyBtn = document.getElementById("close-galaxy-btn");
+    const btnAudio = document.getElementById("btn-audio");
+
+    let gameStarted = false;
+    let audioEnabled = true;
+    let audioCtx = null;
+    let activePlanetIndex = 0;
+    let selectedSector = "Tutti i Settori";
+    let orbitTargetPlanet = null;
+    let warpAnim = null;
+
+    // Audio ambientale spaziale sintetizzato (Web Audio API)
+    function initAudio() {
+      try {
+        if (audioCtx) return;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        osc1.type = "sine";
+        osc2.type = "triangle";
+        osc1.frequency.value = 54;
+        osc2.frequency.value = 81;
+
+        filter.type = "lowpass";
+        filter.frequency.value = 185;
+
+        gain.gain.value = audioEnabled ? 0.045 : 0.0;
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start();
+        osc2.start();
+        window.__ambientGain = gain;
+      } catch (err) {
+        console.warn("Audio non disponibile:", err);
+      }
+    }
+
+    function playScanTone() {
+      try {
+        if (!audioEnabled || !audioCtx) return;
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(980, now + 0.18);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.24);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } catch (err) {
+        // Ignora errori audio in ambienti restrittivi
+      }
+    }
+
+    function playWarpTone() {
+      try {
+        if (!audioEnabled || !audioCtx) return;
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.35);
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(750, now);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.07, now + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.45);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.46);
+      } catch (err) {
+        // Ignora errori audio in ambienti restrittivi
+      }
+    }
+
+    btnAudio.addEventListener("click", () => {
+      initAudio();
+      audioEnabled = !audioEnabled;
+      btnAudio.textContent = audioEnabled ? "Audio: ON" : "Audio: OFF";
+      if (window.__ambientGain && audioCtx) {
+        window.__ambientGain.gain.setTargetAtTime(audioEnabled ? 0.045 : 0.0, audioCtx.currentTime, 0.08);
+      }
+    });
+
+    // Scena Three.js realistica
+    const canvas = document.getElementById("game-canvas");
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030711, 0.00024);
+
+    const camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.2, 4200);
+    camera.position.set(0, 4, 22);
+    camera.rotation.order = "YXZ";
+
+    // Illuminazione multipla realistica
+    const ambientLight = new THREE.AmbientLight(0x6b93c9, 0.58);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff1d6, 2.75);
+    sunLight.position.set(320, 190, -480);
+    scene.add(sunLight);
+
+    const rimLight = new THREE.DirectionalLight(0x5ab8ff, 0.72);
+    rimLight.position.set(-280, -120, 350);
+    scene.add(rimLight);
+
+    // Campo stellare multi-strato
+    function createStarfield(count, minRadius, maxRadius, size, baseOpacity) {
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const palette = [
+        new THREE.Color(0xffffff),
+        new THREE.Color(0xcce8ff),
+        new THREE.Color(0xffe5bd),
+        new THREE.Color(0x9ecbff),
+        new THREE.Color(0xffcbb0)
+      ];
+
+      for (let i = 0; i < count; i++) {
+        const r = minRadius + Math.random() * (maxRadius - minRadius);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.cos(phi);
+        positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+
+        const c = palette[i % palette.length];
+        const lum = 0.65 + Math.random() * 0.35;
+        colors[i * 3] = c.r * lum;
+        colors[i * 3 + 1] = c.g * lum;
+        colors[i * 3 + 2] = c.b * lum;
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      const mat = new THREE.PointsMaterial({
+        size,
+        vertexColors: true,
+        transparent: true,
+        opacity: baseOpacity,
+        sizeAttenuation: true,
+        depthWrite: false
+      });
+      return new THREE.Points(geo, mat);
+    }
+
+    const starsNear = createStarfield(3200, 320, 2200, 2.3, 0.92);
+    const starsFar = createStarfield(2400, 1400, 3200, 4.2, 0.65);
+    scene.add(starsNear, starsFar);
+
+    // Nebulose volumetriche morbide sullo sfondo
+    function createNebulaTexture(colorHex) {
+      const c = document.createElement("canvas");
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext("2d");
+      const base = new THREE.Color(colorHex);
+      const r = Math.round(base.r * 255);
+      const g = Math.round(base.g * 255);
+      const b = Math.round(base.b * 255);
+
+      const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 124);
+      grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.24)`);
+      grad.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.09)`);
+      grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 256, 256);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const nebulaSpecs = [
+      { pos: [-420, 140, -680], scale: 620, color: "#2a7de1" },
+      { pos: [480, -90, -920], scale: 720, color: "#b85488" },
+      { pos: [-340, 180, -1250], scale: 780, color: "#38a89d" },
+      { pos: [360, 120, -1550], scale: 850, color: "#d4883a" }
+    ];
+
+    nebulaSpecs.forEach((spec) => {
+      const mat = new THREE.SpriteMaterial({
+        map: createNebulaTexture(spec.color),
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.position.set(...spec.pos);
+      sprite.scale.set(spec.scale, spec.scale, 1);
+      scene.add(sprite);
+    });
+
+    // Generatore di texture procedurali PBR (Albedo, Bump, Emissive, Nuvole)
+    function createPlanetTextures(planet) {
+      const w = 512;
+      const h = 256;
+
+      const albedoCanvas = document.createElement("canvas");
+      albedoCanvas.width = w;
+      albedoCanvas.height = h;
+      const aCtx = albedoCanvas.getContext("2d");
+
+      const bumpCanvas = document.createElement("canvas");
+      bumpCanvas.width = w;
+      bumpCanvas.height = h;
+      const bCtx = bumpCanvas.getContext("2d");
+
+      const emissiveCanvas = document.createElement("canvas");
+      emissiveCanvas.width = w;
+      emissiveCanvas.height = h;
+      const eCtx = emissiveCanvas.getContext("2d");
+
+      const c1 = new THREE.Color(planet.primaryColor);
+      const c2 = new THREE.Color(planet.secondaryColor);
+      const em = new THREE.Color(planet.emissiveColor);
+
+      const bgGrad = aCtx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, `#${c2.getHexString()}`);
+      bgGrad.addColorStop(0.5, `#${c1.getHexString()}`);
+      bgGrad.addColorStop(1, `#${c2.getHexString()}`);
+      aCtx.fillStyle = bgGrad;
+      aCtx.fillRect(0, 0, w, h);
+
+      bCtx.fillStyle = "#787878";
+      bCtx.fillRect(0, 0, w, h);
+
+      eCtx.fillStyle = "#000000";
+      eCtx.fillRect(0, 0, w, h);
+
+      if (planet.theme === "gas" || planet.theme === "ringed" || planet.theme === "exotic") {
+        for (let y = 0; y < h; y += 3) {
+          const wave = Math.sin(y * 0.085) * 0.5 + 0.5;
+          const mixed = c1.clone().lerp(c2, wave);
+          aCtx.fillStyle = `rgba(${Math.round(mixed.r * 255)}, ${Math.round(mixed.g * 255)}, ${Math.round(mixed.b * 255)}, 0.52)`;
+          aCtx.fillRect(0, y, w, 3 + (y % 4));
+
+          const bVal = Math.round(90 + wave * 95);
+          bCtx.fillStyle = `rgb(${bVal},${bVal},${bVal})`;
+          bCtx.fillRect(0, y, w, 2);
+        }
+      }
+
+      const patches = planet.theme === "gas" ? 42 : 75;
+      for (let i = 0; i < patches; i++) {
+        const px = Math.random() * w;
+        const py = Math.random() * h;
+        const rx = 10 + Math.random() * (planet.theme === "gas" ? 48 : 32);
+        const ry = 6 + Math.random() * 18;
+        const useSecond = Math.random() > 0.45;
+        const col = useSecond ? c2 : c1;
+        const alpha = 0.14 + Math.random() * 0.26;
+
+        aCtx.fillStyle = `rgba(${Math.round(col.r * 255)}, ${Math.round(col.g * 255)}, ${Math.round(col.b * 255)}, ${alpha})`;
+        aCtx.beginPath();
+        aCtx.ellipse(px, py, rx, ry, (Math.random() - 0.5) * 0.4, 0, Math.PI * 2);
+        aCtx.fill();
+
+        const elev = planet.theme === "ocean" && useSecond ? 55 : Math.round(115 + Math.random() * 115);
+        bCtx.fillStyle = `rgba(${elev},${elev},${elev},0.35)`;
+        bCtx.beginPath();
+        bCtx.ellipse(px, py, rx * 0.85, ry * 0.85, 0, 0, Math.PI * 2);
+        bCtx.fill();
+
+        if (planet.theme === "volcanic" && Math.random() > 0.52) {
+          eCtx.strokeStyle = `rgba(${Math.round(em.r * 255)}, ${Math.round(em.g * 255)}, ${Math.round(em.b * 255)}, 0.72)`;
+          eCtx.lineWidth = 1.5 + Math.random() * 2.2;
+          eCtx.beginPath();
+          eCtx.moveTo(px - rx * 0.6, py);
+          eCtx.lineTo(px, py + (Math.random() - 0.5) * 14);
+          eCtx.lineTo(px + rx * 0.6, py + (Math.random() - 0.5) * 10);
+          eCtx.stroke();
+        } else if (planet.theme === "ocean" && Math.random() > 0.75) {
+          eCtx.fillStyle = `rgba(${Math.round(em.r * 255)}, ${Math.round(em.g * 255)}, ${Math.round(em.b * 255)}, 0.22)`;
+          eCtx.beginPath();
+          eCtx.ellipse(px, py, rx * 0.5, ry * 0.4, 0, 0, Math.PI * 2);
+          eCtx.fill();
+        }
+      }
+
+      // Strato di nuvole separato
+      const cloudCanvas = document.createElement("canvas");
+      cloudCanvas.width = w;
+      cloudCanvas.height = h;
+      const clCtx = cloudCanvas.getContext("2d");
+      const clCol = new THREE.Color(planet.cloudColor);
+      const cloudCount = planet.theme === "volcanic" ? 28 : 68;
+
+      for (let i = 0; i < cloudCount; i++) {
+        const cx = Math.random() * w;
+        const cy = Math.random() * h;
+        const crx = 16 + Math.random() * 52;
+        const cry = 4 + Math.random() * 11;
+        clCtx.fillStyle = `rgba(${Math.round(clCol.r * 255)}, ${Math.round(clCol.g * 255)}, ${Math.round(clCol.b * 255)}, ${0.12 + Math.random() * 0.24})`;
+        clCtx.beginPath();
+        clCtx.ellipse(cx, cy, crx, cry, (Math.random() - 0.5) * 0.16, 0, Math.PI * 2);
+        clCtx.fill();
+      }
+
+      const albedoTex = new THREE.CanvasTexture(albedoCanvas);
+      albedoTex.colorSpace = THREE.SRGBColorSpace;
+      albedoTex.wrapS = THREE.RepeatWrapping;
+      albedoTex.wrapT = THREE.ClampToEdgeWrapping;
+
+      const bumpTex = new THREE.CanvasTexture(bumpCanvas);
+      bumpTex.wrapS = THREE.RepeatWrapping;
+      bumpTex.wrapT = THREE.ClampToEdgeWrapping;
+
+      const emissiveTex = new THREE.CanvasTexture(emissiveCanvas);
+      emissiveTex.colorSpace = THREE.SRGBColorSpace;
+      emissiveTex.wrapS = THREE.RepeatWrapping;
+
+      const cloudTex = new THREE.CanvasTexture(cloudCanvas);
+      cloudTex.colorSpace = THREE.SRGBColorSpace;
+      cloudTex.wrapS = THREE.RepeatWrapping;
+
+      return { albedoTex, bumpTex, emissiveTex, cloudTex };
+    }
+
+    function createRingTexture(colorHex, opacity) {
+      const c = document.createElement("canvas");
+      c.width = 512;
+      c.height = 32;
+      const ctx = c.getContext("2d");
+      const base = new THREE.Color(colorHex);
+      const r = Math.round(base.r * 255);
+      const g = Math.round(base.g * 255);
+      const b = Math.round(base.b * 255);
+
+      for (let x = 0; x < 512; x++) {
+        const t = x / 511;
+        const edgeFade = Math.sin(t * Math.PI);
+        const band = 0.55 + 0.45 * Math.sin(x * 0.22) * Math.cos(x * 0.07);
+        const gap = (x > 215 && x < 232) || (x > 350 && x < 360) ? 0.12 : 1.0;
+        const alpha = Math.max(0, Math.min(1, edgeFade * band * gap * opacity));
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`;
+        ctx.fillRect(x, 0, 1, 32);
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // Shader atmosferico Fresnel realistico
+    function createAtmosphereMaterial(colorHex, intensity = 0.72) {
+      return new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Color(colorHex) },
+          uIntensity: { value: intensity }
+        },
+        vertexShader: `
+          varying vec3 vNormalView;
+          varying vec3 vViewDir;
+          void main() {
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vNormalView = normalize(normalMatrix * normal);
+            vViewDir = normalize(-mvPosition.xyz);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uColor;
+          uniform float uIntensity;
+          varying vec3 vNormalView;
+          varying vec3 vViewDir;
+          void main() {
+            float fresnel = pow(1.0 - clamp(dot(normalize(vNormalView), normalize(vViewDir)), 0.0, 1.0), 3.1);
+            gl_FragColor = vec4(uColor, fresnel * uIntensity);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.FrontSide
+      });
+    }
+
+    const planetObjects = [];
+    const hitMeshes = [];
+
+    PLANETS_DATA.forEach((p, idx) => {
+      const group = new THREE.Group();
+      group.position.set(...p.position);
+
+      const texSet = createPlanetTextures(p);
+      const isVolcanic = p.theme === "volcanic";
+      const isOcean = p.theme === "ocean";
+
+      const sphereGeo = new THREE.SphereGeometry(p.radius, 64, 64);
+      const sphereMat = new THREE.MeshStandardMaterial({
+        map: texSet.albedoTex,
+        bumpMap: texSet.bumpTex,
+        bumpScale: isVolcanic ? 0.55 : 0.28,
+        emissiveMap: texSet.emissiveTex,
+        emissive: new THREE.Color(p.emissiveColor),
+        emissiveIntensity: isVolcanic ? 1.45 : isOcean ? 0.35 : 0.14,
+        roughness: isOcean ? 0.42 : 0.78,
+        metalness: isOcean ? 0.12 : 0.05
+      });
+
+      const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+      mesh.userData.planetIndex = idx;
+      group.add(mesh);
+      hitMeshes.push(mesh);
+
+      // Strato di nuvole in rotazione differenziata
+      const cloudGeo = new THREE.SphereGeometry(p.radius * 1.018, 48, 48);
+      const cloudMat = new THREE.MeshStandardMaterial({
+        map: texSet.cloudTex,
+        transparent: true,
+        opacity: 0.78,
+        depthWrite: false
+      });
+      const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+      group.add(clouds);
+
+      // Alone atmosferico Fresnel
+      const atmoGeo = new THREE.SphereGeometry(p.radius * 1.085, 48, 48);
+      const atmoMat = createAtmosphereMaterial(p.atmosphereColor, 0.74);
+      const atmo = new THREE.Mesh(atmoGeo, atmoMat);
+      group.add(atmo);
+
+      // Anello planetario opzionale
+      if (p.ring) {
+        const ringGeo = new THREE.RingGeometry(p.ring.inner, p.ring.outer, 128);
+        const posAttr = ringGeo.attributes.position;
+        const uvAttr = ringGeo.attributes.uv;
+        for (let i = 0; i < posAttr.count; i++) {
+          const vx = posAttr.getX(i);
+          const vy = posAttr.getY(i);
+          const dist = Math.sqrt(vx * vx + vy * vy);
+          const u = (dist - p.ring.inner) / (p.ring.outer - p.ring.inner);
+          uvAttr.setXY(i, u, 0.5);
+        }
+
+        const ringMat = new THREE.MeshBasicMaterial({
+          map: createRingTexture(p.ring.color, p.ring.opacity),
+          side: THREE.DoubleSide,
+          transparent: true,
+          depthWrite: false
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = Math.PI / 2.35;
+        ringMesh.rotation.y = 0.22;
+        group.add(ringMesh);
+      }
+
+      // Lune in orbita
+      const moons = [];
+      for (let m = 0; m < p.moons; m++) {
+        const moonR = Math.max(1.3, p.radius * (0.11 + m * 0.035));
+        const moonGeo = new THREE.SphereGeometry(moonR, 28, 28);
+        const moonMat = new THREE.MeshStandardMaterial({
+          color: m % 2 === 0 ? 0xc6d3e3 : 0xe3cbb0,
+          roughness: 0.88,
+          metalness: 0.04
+        });
+        const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+        const orbitDist = p.radius * (1.72 + m * 0.52);
+        const angle = (m * Math.PI * 2) / Math.max(1, p.moons);
+        moonMesh.position.set(Math.cos(angle) * orbitDist, (m - 0.5) * 3.2, Math.sin(angle) * orbitDist);
+        group.add(moonMesh);
+        moons.push({ mesh: moonMesh, orbitDist, speed: 0.16 / (1 + m * 0.45), angle, yOffset: (m - 0.5) * 3.2 });
+      }
+
+      // Anello marcatore di rotta sottile
+      const markerGeo = new THREE.RingGeometry(p.radius * 1.24, p.radius * 1.27, 64);
+      const markerMat = new THREE.MeshBasicMaterial({
+        color: 0x49d2ff,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.24,
+        depthWrite: false
+      });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      group.add(marker);
+
+      scene.add(group);
+      planetObjects.push({ data: p, group, mesh, clouds, moons, marker });
+    });
+
+    // Fascia di asteroidi tridimensionale lungo la rotta galattica
+    const asteroidCount = 420;
+    const asteroidGeo = new THREE.DodecahedronGeometry(1.15, 0);
+    const asteroidMat = new THREE.MeshStandardMaterial({
+      color: 0x8b95a5,
+      roughness: 0.92,
+      metalness: 0.12
+    });
+    const asteroidInst = new THREE.InstancedMesh(asteroidGeo, asteroidMat, asteroidCount);
+    const dummy = new THREE.Object3D();
+    const asteroidSeeds = [];
+
+    for (let i = 0; i < asteroidCount; i++) {
+      const t = Math.random();
+      const z = -60 - t * 1340;
+      const spreadAngle = Math.random() * Math.PI * 2;
+      const beltRadius = 55 + Math.random() * 210;
+      const x = Math.cos(spreadAngle) * beltRadius;
+      const y = Math.sin(spreadAngle) * beltRadius * 0.55;
+      const scale = 0.45 + Math.random() * 2.1;
+
+      asteroidSeeds.push({
+        x,
+        y,
+        z,
+        scale,
+        rotSpeedX: (Math.random() - 0.5) * 0.7,
+        rotSpeedY: (Math.random() - 0.5) * 0.7,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+    scene.add(asteroidInst);
+
+    // Popolamento schede e atlante galattico
+    function renderPlanetCard(index) {
+      const p = PLANETS_DATA[index];
+      activePlanetIndex = index;
+      cardCategory.textContent = `${p.sector} • ${p.category}`;
+      cardTitle.textContent = p.name;
+      cardQuote.textContent = p.quote;
+      cardDesc.textContent = p.description;
+      cardStats.innerHTML = `
+        <div class="stat-item"><span>Gravità</span><strong>${p.gravity}</strong></div>
+        <div class="stat-item"><span>Temperatura</span><strong>${p.temperature}</strong></div>
+        <div class="stat-item"><span>Atmosfera</span><strong>${p.atmosphere}</strong></div>
+        <div class="stat-item"><span>Meraviglia</span><strong>${p.wonder}</strong></div>
+      `;
+      planetCard.style.display = "block";
+      playScanTone();
+    }
+
+    function renderSectorTabs() {
+      sectorTabsEl.innerHTML = "";
+      SECTORS.forEach((sec) => {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "sector-tab" + (sec === selectedSector ? " active" : "");
+        tab.textContent = sec === "Tutti i Settori" ? sec : sec.split("•")[0].trim();
+        tab.addEventListener("click", () => {
+          selectedSector = sec;
+          renderSectorTabs();
+          renderPlanetList();
+        });
+        sectorTabsEl.appendChild(tab);
+      });
+    }
+
+    function renderPlanetList() {
+      planetListEl.innerHTML = "";
+      PLANETS_DATA.forEach((p, idx) => {
+        if (selectedSector !== "Tutti i Settori" && p.sector !== selectedSector) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "planet-pick";
+        btn.innerHTML = `<strong>${p.name}</strong><small>${p.category} • ${p.temperature}</small>`;
+        btn.addEventListener("click", () => {
+          warpToPlanet(idx, true);
+          galaxyModal.style.display = "none";
+        });
+        planetListEl.appendChild(btn);
+      });
+    }
+
+    function warpToPlanet(index, openCardAfter = false) {
+      const p = PLANETS_DATA[index];
+      activePlanetIndex = index;
+      orbitTargetPlanet = null;
+      playWarpTone();
+
+      warpFlash.style.opacity = "0.85";
+      setTimeout(() => {
+        warpFlash.style.opacity = "0";
+      }, 240);
+
+      const dir = new THREE.Vector3(
+        camera.position.x - p.position[0],
+        (camera.position.y - p.position[1]) * 0.35,
+        camera.position.z - p.position[2]
+      );
+      if (dir.lengthSq() < 0.001) dir.set(0, 0.25, 1);
+      dir.normalize();
+
+      const dest = new THREE.Vector3(
+        p.position[0] + dir.x * (p.radius * 3.1),
+        p.position[1] + Math.max(4, dir.y * p.radius * 1.4),
+        p.position[2] + dir.z * (p.radius * 3.1)
+      );
+
+      warpAnim = {
+        startPos: camera.position.clone(),
+        endPos: dest,
+        lookAt: new THREE.Vector3(...p.position),
+        progress: 0,
+        openCardAfter,
+        planetIndex: index
+      };
+    }
+
+    closeCardBtn.addEventListener("click", () => {
+      planetCard.style.display = "none";
+    });
+
+    btnScan.addEventListener("click", () => {
+      renderPlanetCard(nearestPlanetIndex);
+    });
+
+    btnOrbit.addEventListener("click", () => {
+      orbitTargetPlanet = PLANETS_DATA[activePlanetIndex];
+      planetCard.style.display = "none";
+    });
+
+    btnNext.addEventListener("click", () => {
+      const nextIdx = (activePlanetIndex + 1) % PLANETS_DATA.length;
+      warpToPlanet(nextIdx, true);
+    });
+
+    btnGalaxy.addEventListener("click", () => {
+      renderSectorTabs();
+      renderPlanetList();
+      galaxyModal.style.display = "flex";
+    });
+
+    closeGalaxyBtn.addEventListener("click", () => {
+      galaxyModal.style.display = "none";
+    });
+
+    // Avvio missione e gestione scorrimento iniziale
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+    startBtn.addEventListener("click", () => {
+      initAudio();
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      gameStarted = true;
+      document.body.classList.add("in-game");
+      startScreen.style.display = "none";
+      hud.style.display = "block";
+      crosshair.style.display = "block";
+      if (isTouchDevice) {
+        touchControls.style.display = "block";
+      }
+      warpToPlanet(0, true);
+    });
+
+    // Input tastiera e puntamento
+    const keys = {};
+    let yaw = 0;
+    let pitch = 0;
+
+    window.addEventListener("keydown", (e) => {
+      keys[e.code] = true;
+      if (!gameStarted) return;
+
+      if (e.code === "KeyF") {
+        renderPlanetCard(nearestPlanetIndex);
+      } else if (e.code === "KeyM") {
+        const isOpen = galaxyModal.style.display === "flex";
+        if (isOpen) {
+          galaxyModal.style.display = "none";
+        } else {
+          renderSectorTabs();
+          renderPlanetList();
+          galaxyModal.style.display = "flex";
+        }
+      } else if (e.code === "Escape") {
+        planetCard.style.display = "none";
+        galaxyModal.style.display = "none";
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+    });
+
+    // Controlli touch virtuali
+    const touchState = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      boost: false
+    };
+
+    document.querySelectorAll("[data-control]").forEach((btn) => {
+      const ctrl = btn.getAttribute("data-control");
+      const setState = (val, e) => {
+        if (e) e.preventDefault();
+        touchState[ctrl] = val;
+        btn.classList.toggle("active", val);
+      };
+      btn.addEventListener("pointerdown", (e) => setState(true, e));
+      btn.addEventListener("pointerup", (e) => setState(false, e));
+      btn.addEventListener("pointercancel", (e) => setState(false, e));
+      btn.addEventListener("pointerleave", () => {
+        touchState[ctrl] = false;
+        btn.classList.remove("active");
+      });
+    });
+
+    // Trascinamento visuale + click/tap per aprire la scheda del pianeta
+    let isDragging = false;
+    let dragMoved = false;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    const raycaster = new THREE.Raycaster();
+
+    canvas.addEventListener("pointerdown", (e) => {
+      if (!gameStarted) return;
+      isDragging = true;
+      dragMoved = false;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (!gameStarted || !isDragging) return;
+      const dx = e.clientX - lastPointerX;
+      const dy = e.clientY - lastPointerY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        dragMoved = true;
+        orbitTargetPlanet = null;
+      }
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+
+      const sensitivity = 0.0042;
+      yaw -= dx * sensitivity;
+      pitch -= dy * sensitivity;
+      pitch = Math.max(-Math.PI * 0.46, Math.min(Math.PI * 0.46, pitch));
+    });
+
+    window.addEventListener("pointerup", (e) => {
+      if (!gameStarted) return;
+      if (isDragging && !dragMoved) {
+        const ndc = new THREE.Vector2(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        raycaster.setFromCamera(ndc, camera);
+        const hits = raycaster.intersectObjects(hitMeshes, false);
+        if (hits.length > 0) {
+          const pIdx = hits[0].object.userData.planetIndex;
+          renderPlanetCard(pIdx);
+        }
+      }
+      isDragging = false;
+    });
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Ciclo principale di simulazione
+    let nearestPlanetIndex = 0;
+    let lastTime = performance.now();
+    let orbitAngle = 0;
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+      const elapsed = now * 0.001;
+
+      // Rotazione pianeti, nuvole e lune
+      planetObjects.forEach((obj, idx) => {
+        obj.mesh.rotation.y += dt * (0.065 + (idx % 4) * 0.015);
+        obj.clouds.rotation.y += dt * (0.095 + (idx % 3) * 0.02);
+        obj.marker.lookAt(camera.position);
+
+        obj.moons.forEach((m) => {
+          m.angle += dt * m.speed;
+          m.mesh.position.x = Math.cos(m.angle) * m.orbitDist;
+          m.mesh.position.z = Math.sin(m.angle) * m.orbitDist;
+          m.mesh.position.y = m.yOffset + Math.sin(m.angle * 2) * 0.9;
+          m.mesh.rotation.y += dt * 0.4;
+        });
+      });
+
+      // Aggiornamento fascia di asteroidi
+      for (let i = 0; i < asteroidCount; i++) {
+        const s = asteroidSeeds[i];
+        dummy.position.set(
+          s.x + Math.sin(elapsed * 0.22 + s.phase) * 5.5,
+          s.y + Math.cos(elapsed * 0.18 + s.phase) * 3.5,
+          s.z
+        );
+        dummy.rotation.set(elapsed * s.rotSpeedX, elapsed * s.rotSpeedY, s.phase);
+        dummy.scale.setScalar(s.scale);
+        dummy.updateMatrix();
+        asteroidInst.setMatrixAt(i, dummy.matrix);
+      }
+      asteroidInst.instanceMatrix.needsUpdate = true;
+
+      let moveStrafe = 0;
+
+      if (gameStarted) {
+        if (warpAnim) {
+          warpAnim.progress = Math.min(1, warpAnim.progress + dt * 1.45);
+          const ease = 1 - Math.pow(1 - warpAnim.progress, 3);
+          camera.position.lerpVectors(warpAnim.startPos, warpAnim.endPos, ease);
+          camera.lookAt(warpAnim.lookAt);
+
+          const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
+          yaw = euler.y;
+          pitch = euler.x;
+
+          if (warpAnim.progress >= 1) {
+            const openIdx = warpAnim.planetIndex;
+            const shouldOpen = warpAnim.openCardAfter;
+            warpAnim = null;
+            if (shouldOpen) {
+              renderPlanetCard(openIdx);
+            }
+          }
+        } else if (orbitTargetPlanet) {
+          orbitAngle += dt * 0.24;
+          const r = orbitTargetPlanet.radius * 2.85;
+          camera.position.set(
+            orbitTargetPlanet.position[0] + Math.cos(orbitAngle) * r,
+            orbitTargetPlanet.position[1] + orbitTargetPlanet.radius * 0.42,
+            orbitTargetPlanet.position[2] + Math.sin(orbitAngle) * r
+          );
+          camera.lookAt(...orbitTargetPlanet.position);
+          const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
+          yaw = euler.y;
+          pitch = euler.x;
+        } else {
+          const forwardInput =
+            (keys["KeyW"] || keys["ArrowUp"] || touchState.forward ? 1 : 0) -
+            (keys["KeyS"] || keys["ArrowDown"] || touchState.backward ? 1 : 0);
+          const rightInput =
+            (keys["KeyD"] || keys["ArrowRight"] || touchState.right ? 1 : 0) -
+            (keys["KeyA"] || keys["ArrowLeft"] || touchState.left ? 1 : 0);
+          const upInput =
+            (keys["Space"] || keys["KeyQ"] || touchState.up ? 1 : 0) -
+            (keys["KeyE"] || touchState.down ? 1 : 0);
+          const boosting = keys["ShiftLeft"] || keys["ShiftRight"] || touchState.boost;
+
+          moveStrafe = rightInput;
+
+          const speed = (boosting ? 96 : 44) * dt;
+          const forwardVec = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+          const rightVec = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+
+          camera.position.addScaledVector(forwardVec, forwardInput * speed);
+          camera.position.addScaledVector(rightVec, rightInput * speed);
+          camera.position.y += upInput * speed * 0.85;
+
+          const breathOffset = Math.sin(elapsed * 2.1) * 0.08;
+          camera.rotation.set(pitch + breathOffset * 0.15, yaw, -moveStrafe * 0.032);
+        }
+
+        // Rollio leggero della visiera da astronauta
+        visorOverlay.style.transform = `translate3d(${(-moveStrafe * 6).toFixed(1)}px, ${(Math.sin(elapsed * 2.1) * 3).toFixed(1)}px, 0)`;
+
+        // Calcolo pianeta più vicino
+        let bestDist = Infinity;
+        planetObjects.forEach((obj, idx) => {
+          const d = camera.position.distanceTo(obj.group.position);
+          if (d < bestDist) {
+            bestDist = d;
+            nearestPlanetIndex = idx;
+          }
+        });
+
+        const nearest = PLANETS_DATA[nearestPlanetIndex];
+        const surfaceDist = Math.max(0, Math.round(bestDist - nearest.radius));
+        hudSector.textContent = nearest.sector;
+        hudTarget.textContent = nearest.name;
+        hudDistance.textContent = `Distanza: ${surfaceDist} u.s.`;
+
+        scanPrompt.style.display =
+          surfaceDist < nearest.radius * 4.2 && planetCard.style.display !== "block"
+            ? "block"
+            : "none";
+      } else {
+        camera.position.x = Math.sin(elapsed * 0.12) * 18;
+        camera.position.y = 8 + Math.cos(elapsed * 0.16) * 4;
+        camera.position.z = 26;
+        camera.lookAt(0, 6, -95);
+      }
+
+      starsNear.rotation.y += dt * 0.004;
+      starsFar.rotation.y -= dt * 0.002;
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
